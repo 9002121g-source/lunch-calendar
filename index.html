@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>점심 도시락 신청 달력</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--accent:#111827}
+*{box-sizing:border-box}
+body{margin:0;padding:0 8px;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1180px;margin:16px auto;padding:0 8px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+h1{font-size:22px;margin:0}
+.sub{color:var(--muted);font-size:12px;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #0000000a}
+.people{padding:14px;margin:14px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.person{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:white}
+.person.active{outline:2px solid #111827}
+.shape{font-size:18px;line-height:1}
+input{border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+.btn{border:0;border-radius:9px;padding:9px 12px;background:#111827;color:white;cursor:pointer}
+.btn.secondary{background:white;color:#111827;border:1px solid var(--line)}
+.monthnav{padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.monthtitle{font-size:20px;font-weight:750}
+.calendar{padding:0 18px 18px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--line);border-top:1px solid var(--line)}
+.dow,.day{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dow{text-align:center;padding:10px 4px;background:#f9fafb;font-size:13px;font-weight:700}
+.day{min-height:112px;padding:8px;cursor:pointer;position:relative;background:white}
+.day:hover{background:#fafafa}
+.day.empty{background:#f8fafc;cursor:default}
+.date{font-size:13px;font-weight:700}
+.sun .date{color:#dc2626}
+.sat .date{color:#2563eb}
+.marks{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.mark{font-size:23px;font-weight:900;line-height:1}
+.legend{font-size:12px;color:var(--muted);padding:0 18px 16px}
+.summary{margin-top:14px;padding:16px}
+.summary h2{font-size:16px;margin:0 0 10px}
+.summarygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}
+.sumitem{border:1px solid var(--line);border-radius:10px;padding:10px}
+.sumitem b{display:block;font-size:20px}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:700px){.day{min-height:78px;padding:5px}.mark{font-size:18px}.calendar{padding:0 8px 8px}.monthnav{padding:12px 10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>🍱 점심 도시락 신청 달력</h1>
+      <div class="sub">2026년 8월 ~ 2027년 12월 · 사람을 선택한 뒤 날짜를 클릭하세요.<br>💡 데이터는 이 브라우저에 저장됩니다.</div>
+    </div>
+    <button class="btn secondary" onclick="resetAll()">전체 초기화</button>
+  </div>
+
+  <div class="card people">
+    <b>사람</b>
+    <div id="people"></div>
+    <input id="newName" maxlength="10" placeholder="이름 입력 (최대 5명)" onkeydown="if(event.key==='Enter')addPerson()">
+    <button class="btn" onclick="addPerson()">+ 추가</button>
+  </div>
+
+  <div class="card">
+    <div class="monthnav">
+      <button class="btn secondary" onclick="move(-1)">◀ 이전</button>
+      <div class="monthtitle" id="monthTitle"></div>
+      <button class="btn secondary" onclick="move(1)">다음 ▶</button>
+    </div>
+    <div class="calendar">
+      <div class="grid" id="calendar"></div>
+    </div>
+    <div class="legend">※ 한 날짜에 여러 명이 신청할 수 있습니다. 선택된 사람의 표시를 다시 클릭하면 취소됩니다.</div>
+  </div>
+
+  <div class="card summary">
+    <h2>이번 달 신청 현황</h2>
+    <div id="summary" class="summarygrid"></div>
+  </div>
+</div>
+<script>
+const COLORS=['#e11d48','#2563eb','#16a34a','#9333ea','#ea580c'];
+const SHAPES=['●','▲','★','◆','■'];
+const START={y:2026,m:7},END={y:2027,m:11};
+let state=JSON.parse(localStorage.getItem('lunchCalendarV1')||'null')||{people:[],marks:{}};
+let y=START.y,m=START.m,selected=state.people[0]?.id||null;
+function save(){localStorage.setItem('lunchCalendarV1',JSON.stringify(state))}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addPerson(){
+  if(state.people.length>=5)return alert('사람은 최대 5명까지 추가할 수 있습니다.');
+  let n=document.getElementById('newName').value.trim();if(!n)return;
+  let p={id:'p'+Date.now(),name:n,color:COLORS[state.people.length],shape:SHAPES[state.people.length]};
+  state.people.push(p);selected=p.id;document.getElementById('newName').value='';save();render();
+}
+function removePerson(id,e){
+  e.stopPropagation();if(!confirm('이 사람과 모든 신청 표시를 삭제할까요?'))return;
+  state.people=state.people.filter(p=>p.id!==id);
+  Object.keys(state.marks).forEach(k=>{state.marks[k]=state.marks[k].filter(x=>x!==id);if(!state.marks[k].length)delete state.marks[k]});
+  selected=state.people[0]?.id||null;save();render();
+}
+function toggle(day){
+  if(!selected)return alert('먼저 사람을 추가하거나 선택해주세요.');
+  let key=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  let a=state.marks[key]||[];let i=a.indexOf(selected);if(i>=0)a.splice(i,1);else a.push(selected);
+  if(a.length)state.marks[key]=a;else delete state.marks[key];save();renderCalendar();renderSummary();
+}
+function move(d){
+  let nm=m+d,ny=y;if(nm<0){nm=11;ny--}if(nm>11){nm=0;ny++}
+  if(ny<START.y||(ny===START.y&&nm<START.m)||ny>END.y||(ny===END.y&&nm>END.m))return;
+  y=ny;m=nm;renderCalendar();renderSummary();
+}
+function renderPeople(){
+  let box=document.getElementById('people');box.innerHTML='';
+  state.people.forEach(p=>{let d=document.createElement('span');d.className='person'+(p.id===selected?' active':'');d.onclick=()=>{selected=p.id;renderPeople()};
+  d.innerHTML=`<span class="shape" style="color:${p.color}">${p.shape}</span><span>${esc(p.name)}</span><span title="삭제" style="color:#9ca3af;margin-left:2px" onclick="removePerson('${p.id}',event)">×</span>`;box.appendChild(d)})
+}
+function renderCalendar(){
+  document.getElementById('monthTitle').textContent=`${y}년 ${m+1}월`;
+  let g=document.getElementById('calendar');g.innerHTML='';
+  ['일','월','화','수','목','금','토'].forEach(x=>{let d=document.createElement('div');d.className='dow';d.textContent=x;g.appendChild(d)});
+  let first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++){let d=document.createElement('div');d.className='day empty';g.appendChild(d)}
+  for(let day=1;day<=days;day++){
+    let wd=new Date(y,m,day).getDay(),key=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    let d=document.createElement('div');d.className='day '+(wd===0?'sun':wd===6?'sat':'');d.onclick=()=>toggle(day);
+    let marks=(state.marks[key]||[]).map(id=>state.people.find(p=>p.id===id)).filter(Boolean);
+    d.innerHTML=`<div class="date">${day}</div><div class="marks">${marks.map(p=>`<span class="mark" title="${esc(p.name)}" style="color:${p.color}">${p.shape}</span>`).join('')}</div>`;
+    g.appendChild(d)
+  }
+}
+function renderSummary(){
+  let counts={};state.people.forEach(p=>counts[p.id]=0);
+  Object.entries(state.marks).forEach(([k,a])=>{if(k.startsWith(`${y}-${String(m+1).padStart(2,'0')}-`))a.forEach(id=>{if(id in counts)counts[id]++})});
+  document.getElementById('summary').innerHTML=state.people.length?state.people.map(p=>`<div class="sumitem"><span style="color:${p.color};font-size:18px">${p.shape}</span> ${esc(p.name)}<b>${counts[p.id]}일</b><span class="small">도시락 신청</span></div>`).join(''):'<span class="small">사람을 추가하면 신청 현황이 표시됩니다.</span>';
+}
+function resetAll(){if(confirm('모든 사람과 신청 데이터를 삭제할까요?')){state={people:[],marks:{}};selected=null;save();render()}}
+function render(){renderPeople();renderCalendar();renderSummary()}render();
+</script>
+</body>
+</html>
