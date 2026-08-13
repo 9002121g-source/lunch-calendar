@@ -97,7 +97,7 @@ input{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-famil
 </div>
 
 <!-- 토큰 설정 화면 -->
-<div id="tokenSetup">
+<div id="tokenSetup" style="display:none">
   <div style="font-size:18px;font-weight:700;margin-bottom:8px;">🔑 GitHub 토큰 설정</div>
   <div style="font-size:13px;color:#6b7280;margin-bottom:16px;">
     팀원 모두가 같은 데이터를 공유하려면 GitHub 토큰이 필요합니다.<br>
@@ -392,7 +392,9 @@ window.onload = function () {
     document.getElementById('app').style.display = 'block';
     init();
   }
-  // else: 토큰 입력 UI가 기본으로 표시됨
+  } else {
+    document.getElementById('tokenSetup').style.display = 'block';
+  }
 };
 
 function renderPeople() {
