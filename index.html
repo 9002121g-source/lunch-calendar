@@ -29,6 +29,15 @@ body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;back
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading-msg{font-size:15px;color:var(--text)}
 
+/* 토큰 설정 화면 */
+#tokenSetup{max-width:480px;margin:80px auto;padding:32px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+#tokenInput{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;margin-bottom:8px;font-family:inherit;box-sizing:border-box}
+#tokenInput:focus{outline:none;border-color:#6b7280}
+#tokenConfirmBtn{width:100%;padding:10px;background:#111827;color:white;border:0;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}
+#tokenConfirmBtn:hover{background:#1f2937}
+#tokenConfirmBtn:disabled{opacity:.5;cursor:not-allowed}
+#tokenError{color:#dc2626;font-size:12px;margin-top:6px;display:none}
+
 /* 카드 */
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #0000000a}
 
@@ -82,63 +91,82 @@ input{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-famil
 <body>
 
 <!-- 초기 로딩 오버레이 -->
-<div id="loading">
+<div id="loading" class="hidden">
   <div class="spinner"></div>
   <div id="loading-msg">GitHub에서 데이터 불러오는 중...</div>
 </div>
 
-<div class="wrap">
-
-  <!-- 헤더 -->
-  <div class="top">
-    <div class="top-left">
-      <h1>🍱 점심 도시락 신청 달력</h1>
-      <div class="sub">2026년 8월 ~ 2027년 12월 · 사람을 선택한 뒤 날짜를 클릭하세요. 데이터는 GitHub에 공유 저장됩니다.</div>
-    </div>
-    <div class="top-right">
-      <span id="status"></span>
-      <button class="btn icon secondary" title="새로고침" onclick="manualRefresh()">↺</button>
-      <button class="btn secondary" onclick="resetAll()">전체 초기화</button>
-    </div>
+<!-- 토큰 설정 화면 -->
+<div id="tokenSetup">
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">🔑 GitHub 토큰 설정</div>
+  <div style="font-size:13px;color:#6b7280;margin-bottom:16px;">
+    팀원 모두가 같은 데이터를 공유하려면 GitHub 토큰이 필요합니다.<br>
+    토큰은 이 브라우저에만 저장되며 다른 사람에게 공유되지 않습니다.
   </div>
+  <input id="tokenInput" type="password" placeholder="ghp_..." onkeydown="if(event.key==='Enter')setToken()">
+  <button id="tokenConfirmBtn" onclick="setToken()">저장하고 시작하기</button>
+  <div id="tokenError"></div>
+</div>
 
-  <!-- 사람 -->
-  <div class="card people">
-    <b>사람</b>
-    <div id="people"></div>
-    <input id="newName" maxlength="10" placeholder="이름 입력 (최대 5명)" onkeydown="if(event.key==='Enter')addPerson()">
-    <button class="btn" id="addBtn" onclick="addPerson()">+ 추가</button>
-  </div>
+<!-- 달력 앱 (토큰 설정 전에는 숨김) -->
+<div id="app" style="display:none;">
 
-  <!-- 달력 -->
-  <div class="card">
-    <div class="monthnav">
-      <button class="btn secondary" onclick="move(-1)">◀ 이전</button>
-      <div class="monthtitle" id="monthTitle"></div>
-      <button class="btn secondary" onclick="move(1)">다음 ▶</button>
+  <div class="wrap">
+
+    <!-- 헤더 -->
+    <div class="top">
+      <div class="top-left">
+        <h1>🍱 점심 도시락 신청 달력</h1>
+        <div class="sub">2026년 8월 ~ 2027년 12월 · 사람을 선택한 뒤 날짜를 클릭하세요. 데이터는 GitHub에 공유 저장됩니다.</div>
+      </div>
+      <div class="top-right">
+        <span id="status"></span>
+        <button class="btn icon secondary" title="새로고침" onclick="manualRefresh()">↺</button>
+        <button class="btn secondary" onclick="changeToken()">🔑 토큰 변경</button>
+        <button class="btn secondary" onclick="resetAll()">전체 초기화</button>
+      </div>
     </div>
-    <div class="calendar">
-      <div class="grid" id="calendar"></div>
-    </div>
-    <div class="legend">※ 한 날짜에 여러 명이 신청할 수 있습니다. 선택된 사람의 표시를 다시 클릭하면 취소됩니다.</div>
-  </div>
 
-  <!-- 요약 -->
-  <div class="card summary">
-    <h2>이번 달 신청 현황</h2>
-    <div id="summary" class="summarygrid"></div>
+    <!-- 사람 -->
+    <div class="card people">
+      <b>사람</b>
+      <div id="people"></div>
+      <input id="newName" maxlength="10" placeholder="이름 입력 (최대 5명)" onkeydown="if(event.key==='Enter')addPerson()">
+      <button class="btn" id="addBtn" onclick="addPerson()">+ 추가</button>
+    </div>
+
+    <!-- 달력 -->
+    <div class="card">
+      <div class="monthnav">
+        <button class="btn secondary" onclick="move(-1)">◀ 이전</button>
+        <div class="monthtitle" id="monthTitle"></div>
+        <button class="btn secondary" onclick="move(1)">다음 ▶</button>
+      </div>
+      <div class="calendar">
+        <div class="grid" id="calendar"></div>
+      </div>
+      <div class="legend">※ 한 날짜에 여러 명이 신청할 수 있습니다. 선택된 사람의 표시를 다시 클릭하면 취소됩니다.</div>
+    </div>
+
+    <!-- 요약 -->
+    <div class="card summary">
+      <h2>이번 달 신청 현황</h2>
+      <div id="summary" class="summarygrid"></div>
+    </div>
+
   </div>
 
 </div>
 
 <script>
 /* ── GitHub API 설정 ─────────────────────────────────────────────── */
-const GH_TOKEN = 'GH_TOKEN_PLACEHOLDER';
+let GH_TOKEN = localStorage.getItem('lunchCalToken') || '';
 const GH_OWNER = '9002121g-source';
 const GH_REPO  = 'lunch-calendar';
 const GH_FILE  = 'data.json';
 const API_BASE = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
 const LS_KEY   = 'lunchCalV2';
+const LS_TOKEN = 'lunchCalToken';
 
 /* ── 상수 ────────────────────────────────────────────────────────── */
 const COLORS = ['#e11d48','#2563eb','#16a34a','#9333ea','#ea580c'];
@@ -356,7 +384,17 @@ async function manualRefresh() {
   }
 }
 
-/* ── 렌더: 사람 목록 ─────────────────────────────────────────────── */
+/* ── 페이지 진입점 ───────────────────────────────────────────────── */
+window.onload = function () {
+  GH_TOKEN = localStorage.getItem(LS_TOKEN) || '';
+  if (GH_TOKEN) {
+    document.getElementById('tokenSetup').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    init();
+  }
+  // else: 토큰 입력 UI가 기본으로 표시됨
+};
+
 function renderPeople() {
   const box = document.getElementById('people');
   box.innerHTML = '';
@@ -436,12 +474,60 @@ function renderSummary() {
 /* ── 전체 렌더 ───────────────────────────────────────────────────── */
 function render() { renderPeople(); renderCalendar(); renderSummary(); }
 
-/* ── 초기화 시퀀스 ───────────────────────────────────────────────── */
-window.onload = async function () {
+/* ── 토큰 설정 / 변경 ────────────────────────────────────────────── */
+async function setToken() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) return;
+
+  const btn = document.getElementById('tokenConfirmBtn');
+  const errEl = document.getElementById('tokenError');
+  btn.disabled = true;
+  btn.textContent = '확인 중...';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, {
+      headers: { 'Authorization': `token ${t}` }
+    });
+    if (!res.ok) {
+      errEl.textContent = '토큰이 유효하지 않습니다. 다시 확인해주세요.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '저장하고 시작하기';
+      return;
+    }
+    // 토큰 유효 → 저장 후 달력 시작
+    localStorage.setItem(LS_TOKEN, t);
+    GH_TOKEN = t;
+    document.getElementById('tokenSetup').style.display = 'none';
+    document.getElementById('tokenInput').value = '';
+    document.getElementById('app').style.display = 'block';
+    await init();
+  } catch(e) {
+    errEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '저장하고 시작하기';
+  }
+}
+
+function changeToken() {
+  // 달력 숨기고 토큰 입력 UI 다시 표시
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('tokenSetup').style.display = 'block';
+  const btn = document.getElementById('tokenConfirmBtn');
+  btn.disabled = false;
+  btn.textContent = '저장하고 시작하기';
+  document.getElementById('tokenError').style.display = 'none';
+  document.getElementById('tokenInput').value = '';
+}
+
+/* ── 앱 초기화 (토큰 확인 후 호출) ──────────────────────────────── */
+async function init() {
   showLoading(true, 'GitHub에서 데이터 불러오는 중...');
   try {
     state = await loadData();
-    lsSave(state); // 로드 성공 시 로컬 백업
+    lsSave(state);
   } catch(e) {
     console.warn('[init] GitHub 로드 실패, localStorage 폴백:', e.message);
     state = lsLoad() || {people:[], marks:{}};
@@ -463,7 +549,7 @@ window.onload = async function () {
       // 자동 새로고침 실패는 조용히 무시
     }
   }, 30000);
-};
+}
 </script>
 </body>
 </html>
