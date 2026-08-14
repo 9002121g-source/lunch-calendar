@@ -3,58 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>점심 도시락 신청 달력 (공유)</title>
+<title>점심 도시락 신청 달력</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--accent:#111827}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
-.wrap{max-width:1180px;margin:24px auto;padding:0 16px}
-
-/* 헤더 */
-.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-.top-left h1{font-size:24px;margin:0}
-.top-left .sub{color:var(--muted);font-size:13px;margin-top:5px}
-.top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px}
-
-/* 상태 표시 */
-#status{font-size:12px;color:var(--muted);min-width:100px;text-align:right;transition:color .2s}
-#status.ok{color:#16a34a}
-#status.err{color:#dc2626}
-#status.saving{color:#ea580c}
-
-/* 로딩 오버레이 */
-#loading{position:fixed;inset:0;background:rgba(245,247,251,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
-#loading.hidden{display:none}
-.spinner{width:40px;height:40px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#loading-msg{font-size:15px;color:var(--text)}
-
-/* 토큰 설정 화면 */
-#tokenSetup{max-width:480px;margin:80px auto;padding:32px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-#tokenInput{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;margin-bottom:8px;font-family:inherit;box-sizing:border-box}
-#tokenInput:focus{outline:none;border-color:#6b7280}
-#tokenConfirmBtn{width:100%;padding:10px;background:#111827;color:white;border:0;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}
-#tokenConfirmBtn:hover{background:#1f2937}
-#tokenConfirmBtn:disabled{opacity:.5;cursor:not-allowed}
-#tokenError{color:#dc2626;font-size:12px;margin-top:6px;display:none}
-
-/* 카드 */
+body{margin:0;padding:0 8px;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1180px;margin:16px auto;padding:0 8px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+h1{font-size:22px;margin:0}
+.sub{color:var(--muted);font-size:12px;margin-top:4px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #0000000a}
-
-/* 사람 */
-.people{padding:14px;margin:16px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.people{padding:14px;margin:14px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .person{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:white}
 .person.active{outline:2px solid #111827}
 .shape{font-size:18px;line-height:1}
-
-/* 입력 / 버튼 */
-input{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-family:inherit;font-size:14px}
-.btn{border:0;border-radius:9px;padding:9px 12px;background:#111827;color:white;cursor:pointer;font-family:inherit;font-size:13px}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+input{border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+.btn{border:0;border-radius:9px;padding:9px 12px;background:#111827;color:white;cursor:pointer}
 .btn.secondary{background:white;color:#111827;border:1px solid var(--line)}
-.btn.icon{padding:8px 10px;font-size:15px;line-height:1}
-
-/* 달력 */
 .monthnav{padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
 .monthtitle{font-size:20px;font-weight:750}
 .calendar{padding:0 18px 18px}
@@ -70,488 +35,106 @@ input{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-famil
 .marks{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
 .mark{font-size:23px;font-weight:900;line-height:1}
 .legend{font-size:12px;color:var(--muted);padding:0 18px 16px}
-
-/* 요약 */
-.summary{margin-top:16px;padding:16px}
+.summary{margin-top:14px;padding:16px}
 .summary h2{font-size:16px;margin:0 0 10px}
 .summarygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}
 .sumitem{border:1px solid var(--line);border-radius:10px;padding:10px}
 .sumitem b{display:block;font-size:20px}
 .small{font-size:12px;color:var(--muted)}
-
-@media(max-width:700px){
-  .day{min-height:78px;padding:5px}
-  .mark{font-size:18px}
-  .calendar{padding:0 8px 8px}
-  .monthnav{padding:12px 10px}
-  h1{font-size:20px}
-}
+@media(max-width:700px){.day{min-height:78px;padding:5px}.mark{font-size:18px}.calendar{padding:0 8px 8px}.monthnav{padding:12px 10px}}
 </style>
 </head>
 <body>
-
-<!-- 초기 로딩 오버레이 -->
-<div id="loading" class="hidden">
-  <div class="spinner"></div>
-  <div id="loading-msg">GitHub에서 데이터 불러오는 중...</div>
-</div>
-
-<!-- 토큰 설정 화면 -->
-<div id="tokenSetup" style="display:none">
-  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">🔑 GitHub 토큰 설정</div>
-  <div style="font-size:13px;color:#6b7280;margin-bottom:16px;">
-    팀원 모두가 같은 데이터를 공유하려면 GitHub 토큰이 필요합니다.<br>
-    토큰은 이 브라우저에만 저장되며 다른 사람에게 공유되지 않습니다.
-  </div>
-  <input id="tokenInput" type="password" placeholder="ghp_..." onkeydown="if(event.key==='Enter')setToken()">
-  <button id="tokenConfirmBtn" onclick="setToken()">저장하고 시작하기</button>
-  <div id="tokenError"></div>
-</div>
-
-<!-- 달력 앱 (토큰 설정 전에는 숨김) -->
-<div id="app" style="display:none;">
-
-  <div class="wrap">
-
-    <!-- 헤더 -->
-    <div class="top">
-      <div class="top-left">
-        <h1>🍱 점심 도시락 신청 달력</h1>
-        <div class="sub">2026년 8월 ~ 2027년 12월 · 사람을 선택한 뒤 날짜를 클릭하세요. 데이터는 GitHub에 공유 저장됩니다.</div>
-      </div>
-      <div class="top-right">
-        <span id="status"></span>
-        <button class="btn icon secondary" title="새로고침" onclick="manualRefresh()">↺</button>
-        <button class="btn secondary" onclick="changeToken()">🔑 토큰 변경</button>
-        <button class="btn secondary" onclick="resetAll()">전체 초기화</button>
-      </div>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>🍱 점심 도시락 신청 달력</h1>
+      <div class="sub">2026년 8월 ~ 2027년 12월 · 사람을 선택한 뒤 날짜를 클릭하세요.<br>💡 데이터는 이 브라우저에 저장됩니다.</div>
     </div>
-
-    <!-- 사람 -->
-    <div class="card people">
-      <b>사람</b>
-      <div id="people"></div>
-      <input id="newName" maxlength="10" placeholder="이름 입력 (최대 5명)" onkeydown="if(event.key==='Enter')addPerson()">
-      <button class="btn" id="addBtn" onclick="addPerson()">+ 추가</button>
-    </div>
-
-    <!-- 달력 -->
-    <div class="card">
-      <div class="monthnav">
-        <button class="btn secondary" onclick="move(-1)">◀ 이전</button>
-        <div class="monthtitle" id="monthTitle"></div>
-        <button class="btn secondary" onclick="move(1)">다음 ▶</button>
-      </div>
-      <div class="calendar">
-        <div class="grid" id="calendar"></div>
-      </div>
-      <div class="legend">※ 한 날짜에 여러 명이 신청할 수 있습니다. 선택된 사람의 표시를 다시 클릭하면 취소됩니다.</div>
-    </div>
-
-    <!-- 요약 -->
-    <div class="card summary">
-      <h2>이번 달 신청 현황</h2>
-      <div id="summary" class="summarygrid"></div>
-    </div>
-
+    <button class="btn secondary" onclick="resetAll()">전체 초기화</button>
   </div>
 
-</div>
+  <div class="card people">
+    <b>사람</b>
+    <div id="people"></div>
+    <input id="newName" maxlength="10" placeholder="이름 입력 (최대 5명)" onkeydown="if(event.key==='Enter')addPerson()">
+    <button class="btn" onclick="addPerson()">+ 추가</button>
+  </div>
 
+  <div class="card">
+    <div class="monthnav">
+      <button class="btn secondary" onclick="move(-1)">◀ 이전</button>
+      <div class="monthtitle" id="monthTitle"></div>
+      <button class="btn secondary" onclick="move(1)">다음 ▶</button>
+    </div>
+    <div class="calendar">
+      <div class="grid" id="calendar"></div>
+    </div>
+    <div class="legend">※ 한 날짜에 여러 명이 신청할 수 있습니다. 선택된 사람의 표시를 다시 클릭하면 취소됩니다.</div>
+  </div>
+
+  <div class="card summary">
+    <h2>이번 달 신청 현황</h2>
+    <div id="summary" class="summarygrid"></div>
+  </div>
+</div>
 <script>
-/* ── GitHub API 설정 ─────────────────────────────────────────────── */
-let GH_TOKEN = localStorage.getItem('lunchCalToken') || '';
-const GH_OWNER = '9002121g-source';
-const GH_REPO  = 'lunch-calendar';
-const GH_FILE  = 'data.json';
-const API_BASE = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
-const LS_KEY   = 'lunchCalV2';
-const LS_TOKEN = 'lunchCalToken';
-
-/* ── 상수 ────────────────────────────────────────────────────────── */
-const COLORS = ['#e11d48','#2563eb','#16a34a','#9333ea','#ea580c'];
-const SHAPES = ['●','▲','★','◆','■'];
-const START  = {y:2026, m:7};   // 0-based month
-const END    = {y:2027, m:11};
-
-/* ── 상태 변수 ───────────────────────────────────────────────────── */
-let state      = {people:[], marks:{}};
-let currentSha = null;   // GitHub 파일 SHA (PUT 시 필요)
-let y          = START.y;
-let m          = START.m;
-let selected   = null;
-let isSaving   = false;  // 저장 중 중복 방지
-let statusTimer = null;
-
-/* ── GitHub API: 읽기 ────────────────────────────────────────────── */
-async function loadData() {
-  const res = await fetch(API_BASE, {
-    headers: {
-      'Authorization': `token ${GH_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  });
-  if (res.status === 404) {
-    currentSha = null;
-    return {people:[], marks:{}};
-  }
-  if (!res.ok) throw new Error(`GitHub 읽기 실패 (HTTP ${res.status})`);
-  const json = await res.json();
-  currentSha = json.sha;
-  const decoded = atob(json.content.replace(/\n/g, ''));
-  return JSON.parse(decoded);
+const COLORS=['#e11d48','#2563eb','#16a34a','#9333ea','#ea580c'];
+const SHAPES=['●','▲','★','◆','■'];
+const START={y:2026,m:7},END={y:2027,m:11};
+let state=JSON.parse(localStorage.getItem('lunchCalendarV1')||'null')||{people:[],marks:{}};
+let y=START.y,m=START.m,selected=state.people[0]?.id||null;
+function save(){localStorage.setItem('lunchCalendarV1',JSON.stringify(state))}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addPerson(){
+  if(state.people.length>=5)return alert('사람은 최대 5명까지 추가할 수 있습니다.');
+  let n=document.getElementById('newName').value.trim();if(!n)return;
+  let p={id:'p'+Date.now(),name:n,color:COLORS[state.people.length],shape:SHAPES[state.people.length]};
+  state.people.push(p);selected=p.id;document.getElementById('newName').value='';save();render();
 }
-
-/* ── GitHub API: 저장 ────────────────────────────────────────────── */
-async function saveData(data) {
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-  const body = {
-    message: 'Update lunch calendar',
-    content: content,
-    ...(currentSha ? {sha: currentSha} : {})
-  };
-  const res = await fetch(API_BASE, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `token ${GH_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`GitHub 저장 실패 (HTTP ${res.status}): ${errText}`);
-  }
-  const json = await res.json();
-  if (json.content && json.content.sha) currentSha = json.content.sha;
-  return json;
+function removePerson(id,e){
+  e.stopPropagation();if(!confirm('이 사람과 모든 신청 표시를 삭제할까요?'))return;
+  state.people=state.people.filter(p=>p.id!==id);
+  Object.keys(state.marks).forEach(k=>{state.marks[k]=state.marks[k].filter(x=>x!==id);if(!state.marks[k].length)delete state.marks[k]});
+  selected=state.people[0]?.id||null;save();render();
 }
-
-/* ── 충돌 방지 병합 저장 ─────────────────────────────────────────── */
-async function saveWithMerge(localState) {
-  // 저장 전 최신 SHA + 서버 데이터 읽기
-  const serverState = await loadData();
-  // marks 병합: 서버 기반 + 로컬 덮어쓰기
-  // people: 로컬 기준 (방금 추가/삭제한 사람 유지)
-  const merged = {
-    people: localState.people,
-    marks:  Object.assign({}, serverState.marks, localState.marks)
-  };
-  await saveData(merged);
-  return merged;
+function toggle(day){
+  if(!selected)return alert('먼저 사람을 추가하거나 선택해주세요.');
+  let key=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  let a=state.marks[key]||[];let i=a.indexOf(selected);if(i>=0)a.splice(i,1);else a.push(selected);
+  if(a.length)state.marks[key]=a;else delete state.marks[key];save();renderCalendar();renderSummary();
 }
-
-/* ── localStorage 폴백 ───────────────────────────────────────────── */
-function lsSave(data) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e) {}
+function move(d){
+  let nm=m+d,ny=y;if(nm<0){nm=11;ny--}if(nm>11){nm=0;ny++}
+  if(ny<START.y||(ny===START.y&&nm<START.m)||ny>END.y||(ny===END.y&&nm>END.m))return;
+  y=ny;m=nm;renderCalendar();renderSummary();
 }
-function lsLoad() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null') || null; } catch(e) { return null; }
+function renderPeople(){
+  let box=document.getElementById('people');box.innerHTML='';
+  state.people.forEach(p=>{let d=document.createElement('span');d.className='person'+(p.id===selected?' active':'');d.onclick=()=>{selected=p.id;renderPeople()};
+  d.innerHTML=`<span class="shape" style="color:${p.color}">${p.shape}</span><span>${esc(p.name)}</span><span title="삭제" style="color:#9ca3af;margin-left:2px" onclick="removePerson('${p.id}',event)">×</span>`;box.appendChild(d)})
 }
-
-/* ── UI 헬퍼 ─────────────────────────────────────────────────────── */
-function showLoading(on, msg) {
-  const el = document.getElementById('loading');
-  if (on) {
-    document.getElementById('loading-msg').textContent = msg || 'GitHub에서 데이터 불러오는 중...';
-    el.classList.remove('hidden');
-  } else {
-    el.classList.add('hidden');
+function renderCalendar(){
+  document.getElementById('monthTitle').textContent=`${y}년 ${m+1}월`;
+  let g=document.getElementById('calendar');g.innerHTML='';
+  ['일','월','화','수','목','금','토'].forEach(x=>{let d=document.createElement('div');d.className='dow';d.textContent=x;g.appendChild(d)});
+  let first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++){let d=document.createElement('div');d.className='day empty';g.appendChild(d)}
+  for(let day=1;day<=days;day++){
+    let wd=new Date(y,m,day).getDay(),key=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    let d=document.createElement('div');d.className='day '+(wd===0?'sun':wd===6?'sat':'');d.onclick=()=>toggle(day);
+    let marks=(state.marks[key]||[]).map(id=>state.people.find(p=>p.id===id)).filter(Boolean);
+    d.innerHTML=`<div class="date">${day}</div><div class="marks">${marks.map(p=>`<span class="mark" title="${esc(p.name)}" style="color:${p.color}">${p.shape}</span>`).join('')}</div>`;
+    g.appendChild(d)
   }
 }
-
-function showStatus(msg, type) {
-  // type: 'ok' | 'err' | 'saving' | '' (기본 muted)
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = type || '';
-  clearTimeout(statusTimer);
-  if (type === 'ok') {
-    statusTimer = setTimeout(() => { el.textContent = ''; el.className = ''; }, 2500);
-  }
+function renderSummary(){
+  let counts={};state.people.forEach(p=>counts[p.id]=0);
+  Object.entries(state.marks).forEach(([k,a])=>{if(k.startsWith(`${y}-${String(m+1).padStart(2,'0')}-`))a.forEach(id=>{if(id in counts)counts[id]++})});
+  document.getElementById('summary').innerHTML=state.people.length?state.people.map(p=>`<div class="sumitem"><span style="color:${p.color};font-size:18px">${p.shape}</span> ${esc(p.name)}<b>${counts[p.id]}일</b><span class="small">도시락 신청</span></div>`).join(''):'<span class="small">사람을 추가하면 신청 현황이 표시됩니다.</span>';
 }
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
-  );
-}
-
-/* ── 사람 추가 ───────────────────────────────────────────────────── */
-async function addPerson() {
-  if (state.people.length >= 5) return alert('사람은 최대 5명까지 추가할 수 있습니다.');
-  const n = document.getElementById('newName').value.trim();
-  if (!n) return;
-  const p = {
-    id:    'p' + Date.now(),
-    name:  n,
-    color: COLORS[state.people.length],
-    shape: SHAPES[state.people.length]
-  };
-  state.people.push(p);
-  selected = p.id;
-  document.getElementById('newName').value = '';
-  renderPeople();
-  await persistState();
-  renderPeople(); // 저장 후 merged state 반영
-}
-
-/* ── 사람 삭제 ───────────────────────────────────────────────────── */
-async function removePerson(id, e) {
-  e.stopPropagation();
-  if (!confirm('이 사람과 모든 신청 표시를 삭제할까요?')) return;
-  state.people = state.people.filter(p => p.id !== id);
-  Object.keys(state.marks).forEach(k => {
-    state.marks[k] = state.marks[k].filter(x => x !== id);
-    if (!state.marks[k].length) delete state.marks[k];
-  });
-  selected = state.people[0]?.id || null;
-  render();
-  await persistState();
-  render();
-}
-
-/* ── 날짜 토글 ───────────────────────────────────────────────────── */
-async function toggle(day) {
-  if (!selected) return alert('먼저 사람을 추가하거나 선택해주세요.');
-  if (isSaving) return; // 저장 중 중복 클릭 무시
-
-  const key = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-  const a   = state.marks[key] ? [...state.marks[key]] : [];
-  const i   = a.indexOf(selected);
-  if (i >= 0) a.splice(i, 1); else a.push(selected);
-  if (a.length) state.marks[key] = a; else delete state.marks[key];
-
-  renderCalendar();
-  renderSummary();
-  await persistState();
-  renderCalendar();
-  renderSummary();
-}
-
-/* ── 저장 공통 로직 (GitHub + LS 폴백) ──────────────────────────── */
-async function persistState() {
-  if (isSaving) return;
-  isSaving = true;
-  showStatus('저장 중...', 'saving');
-  try {
-    const merged = await saveWithMerge(state);
-    state = merged;
-    lsSave(state);
-    showStatus('저장 완료 ✓', 'ok');
-  } catch(e) {
-    console.warn('[persistState] GitHub 저장 실패, 로컬 저장으로 대체:', e.message);
-    lsSave(state);
-    showStatus('로컬 저장됨 (GitHub 연결 오류)', 'err');
-  } finally {
-    isSaving = false;
-  }
-}
-
-/* ── 월 이동 ─────────────────────────────────────────────────────── */
-function move(d) {
-  let nm = m + d, ny = y;
-  if (nm < 0)  { nm = 11; ny--; }
-  if (nm > 11) { nm = 0;  ny++; }
-  if (ny < START.y || (ny === START.y && nm < START.m) ||
-      ny > END.y   || (ny === END.y   && nm > END.m)) return;
-  y = ny; m = nm;
-  renderCalendar();
-  renderSummary();
-}
-
-/* ── 전체 초기화 ─────────────────────────────────────────────────── */
-async function resetAll() {
-  if (!confirm('모든 사람과 신청 데이터를 삭제할까요?')) return;
-  state    = {people:[], marks:{}};
-  selected = null;
-  render();
-  await persistState();
-}
-
-/* ── 수동 새로고침 ───────────────────────────────────────────────── */
-async function manualRefresh() {
-  showStatus('새로고침 중...', 'saving');
-  try {
-    const fresh = await loadData();
-    state = fresh;
-    lsSave(state);
-    render();
-    showStatus('새로고침 완료 ✓', 'ok');
-  } catch(e) {
-    showStatus('새로고침 실패', 'err');
-  }
-}
-
-/* ── 페이지 진입점 ───────────────────────────────────────────────── */
-window.onload = function () {
-  GH_TOKEN = localStorage.getItem(LS_TOKEN) || '';
-  if (GH_TOKEN) {
-    document.getElementById('tokenSetup').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    init();
-  }
-  } else {
-    document.getElementById('tokenSetup').style.display = 'block';
-  }
-};
-
-function renderPeople() {
-  const box = document.getElementById('people');
-  box.innerHTML = '';
-  state.people.forEach(p => {
-    const d = document.createElement('span');
-    d.className = 'person' + (p.id === selected ? ' active' : '');
-    d.onclick = () => { selected = p.id; renderPeople(); };
-    d.innerHTML =
-      `<span class="shape" style="color:${p.color}">${p.shape}</span>` +
-      `<span>${esc(p.name)}</span>` +
-      `<span title="삭제" style="color:#9ca3af;margin-left:2px"
-             onclick="removePerson('${p.id}',event)">×</span>`;
-    box.appendChild(d);
-  });
-}
-
-/* ── 렌더: 달력 ──────────────────────────────────────────────────── */
-function renderCalendar() {
-  document.getElementById('monthTitle').textContent = `${y}년 ${m+1}월`;
-  const g = document.getElementById('calendar');
-  g.innerHTML = '';
-
-  ['일','월','화','수','목','금','토'].forEach(x => {
-    const d = document.createElement('div');
-    d.className = 'dow';
-    d.textContent = x;
-    g.appendChild(d);
-  });
-
-  const first = new Date(y, m, 1).getDay();
-  const days  = new Date(y, m+1, 0).getDate();
-
-  for (let i = 0; i < first; i++) {
-    const d = document.createElement('div');
-    d.className = 'day empty';
-    g.appendChild(d);
-  }
-
-  for (let day = 1; day <= days; day++) {
-    const wd  = new Date(y, m, day).getDay();
-    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const d   = document.createElement('div');
-    d.className = 'day ' + (wd === 0 ? 'sun' : wd === 6 ? 'sat' : '');
-    d.onclick = () => toggle(day);
-
-    const marks = (state.marks[key] || [])
-      .map(id => state.people.find(p => p.id === id))
-      .filter(Boolean);
-
-    d.innerHTML =
-      `<div class="date">${day}</div>` +
-      `<div class="marks">${marks.map(p =>
-        `<span class="mark" title="${esc(p.name)}" style="color:${p.color}">${p.shape}</span>`
-      ).join('')}</div>`;
-
-    g.appendChild(d);
-  }
-}
-
-/* ── 렌더: 요약 ──────────────────────────────────────────────────── */
-function renderSummary() {
-  const counts = {};
-  state.people.forEach(p => counts[p.id] = 0);
-  const prefix = `${y}-${String(m+1).padStart(2,'0')}-`;
-  Object.entries(state.marks).forEach(([k, a]) => {
-    if (k.startsWith(prefix)) a.forEach(id => { if (id in counts) counts[id]++; });
-  });
-  document.getElementById('summary').innerHTML = state.people.length
-    ? state.people.map(p =>
-        `<div class="sumitem">` +
-        `<span style="color:${p.color};font-size:18px">${p.shape}</span> ${esc(p.name)}` +
-        `<b>${counts[p.id]}일</b><span class="small">도시락 신청</span></div>`
-      ).join('')
-    : '<span class="small">사람을 추가하면 신청 현황이 표시됩니다.</span>';
-}
-
-/* ── 전체 렌더 ───────────────────────────────────────────────────── */
-function render() { renderPeople(); renderCalendar(); renderSummary(); }
-
-/* ── 토큰 설정 / 변경 ────────────────────────────────────────────── */
-async function setToken() {
-  const t = document.getElementById('tokenInput').value.trim();
-  if (!t) return;
-
-  const btn = document.getElementById('tokenConfirmBtn');
-  const errEl = document.getElementById('tokenError');
-  btn.disabled = true;
-  btn.textContent = '확인 중...';
-  errEl.style.display = 'none';
-
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, {
-      headers: { 'Authorization': `token ${t}` }
-    });
-    if (!res.ok) {
-      errEl.textContent = '토큰이 유효하지 않습니다. 다시 확인해주세요.';
-      errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = '저장하고 시작하기';
-      return;
-    }
-    // 토큰 유효 → 저장 후 달력 시작
-    localStorage.setItem(LS_TOKEN, t);
-    GH_TOKEN = t;
-    document.getElementById('tokenSetup').style.display = 'none';
-    document.getElementById('tokenInput').value = '';
-    document.getElementById('app').style.display = 'block';
-    await init();
-  } catch(e) {
-    errEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '저장하고 시작하기';
-  }
-}
-
-function changeToken() {
-  // 달력 숨기고 토큰 입력 UI 다시 표시
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('tokenSetup').style.display = 'block';
-  const btn = document.getElementById('tokenConfirmBtn');
-  btn.disabled = false;
-  btn.textContent = '저장하고 시작하기';
-  document.getElementById('tokenError').style.display = 'none';
-  document.getElementById('tokenInput').value = '';
-}
-
-/* ── 앱 초기화 (토큰 확인 후 호출) ──────────────────────────────── */
-async function init() {
-  showLoading(true, 'GitHub에서 데이터 불러오는 중...');
-  try {
-    state = await loadData();
-    lsSave(state);
-  } catch(e) {
-    console.warn('[init] GitHub 로드 실패, localStorage 폴백:', e.message);
-    state = lsLoad() || {people:[], marks:{}};
-    showStatus('오프라인 모드 (로컬 데이터)', 'err');
-  }
-  selected = state.people[0]?.id || null;
-  showLoading(false);
-  render();
-
-  // 30초마다 자동 새로고침
-  setInterval(async () => {
-    try {
-      const fresh = await loadData();
-      state = fresh;
-      lsSave(state);
-      renderCalendar();
-      renderSummary();
-    } catch(e) {
-      // 자동 새로고침 실패는 조용히 무시
-    }
-  }, 30000);
-}
+function resetAll(){if(confirm('모든 사람과 신청 데이터를 삭제할까요?')){state={people:[],marks:{}};selected=null;save();render()}}
+function render(){renderPeople();renderCalendar();renderSummary()}render();
 </script>
 </body>
 </html>
