@@ -82,7 +82,7 @@ input{border:1px solid var(--line);border-radius:9px;padding:9px 10px}
 <script>
 const COLORS=['#e11d48','#2563eb','#16a34a','#9333ea','#ea580c'];
 const SHAPES=['●','▲','★','◆','■'];
-const START={y:2026,m:7},END={y:2027,m:11};
+const _now=new Date(),START={y:_now.getFullYear(),m:_now.getMonth()},END={y:2027,m:11};
 const OWNER='9002121g-source',REPO='lunch-calendar',FILE='data.json';
 const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
 
